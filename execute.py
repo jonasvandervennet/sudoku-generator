@@ -1,4 +1,4 @@
-from sudoku import Sudoku
+from sudoku.definitions import Sudoku
 
 custom_easy = [
     [0,0,0,8,0,4,0,5,0],
@@ -53,7 +53,8 @@ def makelist(iterable, verbose=False):
         print(f'{sudoku.size}x{sudoku.size}: {sudoku.calculation_time}s')
 
 
-# sc = Sudoku(size=9, custom=custom_expert, verbose=True)
+sc = Sudoku(size=9, custom=custom_easy, verbose=True)
+sc.solve()
 # sc2 = Sudoku(size=9, custom=custom_expert, verbose=True)
 # s16 = Sudoku(size=16, verbose=True)
 # s16c = Sudoku(size=16, custom=custom_16, verbose=True)

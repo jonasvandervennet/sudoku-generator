@@ -121,6 +121,7 @@ class Sudoku():
             interval = time.time() - starttime
             self.calculation_time = interval
             self.print(f"Solution found in {interval}s")
+        return self
 
     @property
     def is_valid(self):
@@ -181,4 +182,4 @@ class Node():
         return (self.value, self.row, self.col) == (other.value, other.row, other.col)
 
     def __str__(self):
-        return f"node({self.row},{self.col})"
+        return f"node({self.row},{self.col}): {self.value}"
