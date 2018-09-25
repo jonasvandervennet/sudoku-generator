@@ -16,7 +16,8 @@ class Sudoku():
         self._tilesize = int(np.sqrt(size))
         self.nodes, self._rows, self._cols, self._tiles = self.initnodes()
         self.connect_nodes()
-        self.fillgrid(custom)
+        if custom is not None:
+            self.fillgrid(custom)
 
     def get_row(self, row):
         return self._rows[row]
@@ -51,7 +52,22 @@ class Sudoku():
                 node.connected_nodes.add(connected_node)
             node.connected_nodes -= set([node])
 
-    def fillgrid(self, custom=None):
+    def fillgrid(self, custom):
+        try:
+            for i, row in enumerate(self._rows):
+                for j, node in enumerate(row):
+                    if custom[i][j] != 0:
+                        node.original = True
+                    node.value = custom[i][j]
+        except IndexError:
+            raise IndexError("Custom sudoku layout was not of the right format!")
+        except Exception as e:  # replace with indexoutofboundserror
+            raise e
+
+        self.print("Custom input submitted and processed:")
+        self.print(self)
+
+    def solve(self):
         def executeFill(queue, depth=0):
             if depth % 50 == 0:
                 self.print(f'On rec depth {depth}')
@@ -82,24 +98,9 @@ class Sudoku():
             queue = [node] + queue  # ~push front
             return False, queue
 
-        if custom is not None:
-            try:
-                for i, row in enumerate(self._rows):
-                    for j, node in enumerate(row):
-                        if custom[i][j] != 0:
-                            node.original = True
-                        node.value = custom[i][j]
-            except IndexError:
-                raise IndexError("Custom sudoku layout was not of the right format!")
-            except Exception as e:  # replace with indexoutofboundserror
-                raise e
-
-            self.print("Custom input submitted and processed:")
-            self.print(self)
-
         queue = [node for node in self.nodes if not node.original]
         if len(queue) == 0:
-            #  The custom input was completely full, check if valid or not
+            #  The sudoku was already completely full, check if valid or not
             if not self.is_valid:
                 self.print("Given solution is not valid!")
                 self.print(self)
