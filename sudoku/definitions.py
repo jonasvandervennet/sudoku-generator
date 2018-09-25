@@ -4,7 +4,7 @@ import time
 
 
 class Sudoku():
-    def __init__(self, size=9, custom=None, verbose=False):
+    def __init__(self, size=9, custom=None, solve=False, verbose=False):
         # assume size is perfect square (TODO: assert square)
         # size is defined as the length of one side
         """
@@ -18,6 +18,8 @@ class Sudoku():
         self.connect_nodes()
         if custom is not None:
             self.fillgrid(custom)
+        if solve:
+            self.solve()
 
     def get_row(self, row):
         return self._rows[row]
