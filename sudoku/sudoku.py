@@ -2,7 +2,7 @@ import numpy as np
 import random
 import time
 
-from node import Node
+from sudoku.node import Node
 
 
 class Sudoku():
@@ -71,7 +71,7 @@ class Sudoku():
         self.print("Custom input submitted and processed:")
         self.print(self)
 
-    def solve(self):
+    def solve(self, returnBranching=False):
         def executeFill(queue, depth=0):
             if depth % 50 == 0:
                 self.print(f'On rec depth {depth}')
@@ -86,21 +86,25 @@ class Sudoku():
 
             options = list(set([i for i in range(1, self.size + 1)]) - neighbor_values)
             random.shuffle(options)
-
+            branch = 1  # for detetermining branch factor (difficulty)
             for option in options:
                 node.value = option
 
                 if len(queue) == 0:  # empty
-                    return True, queue
+                    return {'result': True, 'queue': queue, 'branchfactor': branch}
 
-                result, queue = executeFill(queue, depth=depth + 1)
-                if result:
-                    return True, queue
+                results = executeFill(queue, depth=depth + 1)
+                queue = results['queue']
+                if results['result']:
+                    branch = (branch - 1)**2
+                    branch += results['branchfactor']  # keeping summation going
+                    return {'result': True, 'queue': queue, 'branchfactor': branch}
+                branch += 1
 
             # base case
             node.value = 0
             queue = [node] + queue  # ~push front
-            return False, queue
+            return {'result': False, 'queue': queue}
 
         queue = [node for node in self.nodes if not node.original]
         if len(queue) == 0:
@@ -116,16 +120,29 @@ class Sudoku():
 
         self.print('Trying to fill board...')
         starttime = time.time()
-        if (not executeFill(queue)[0]) or (not self.is_valid):
+        executionResults = executeFill(queue)
+        interval = time.time() - starttime
+        self.calculation_time = interval
+        if (not executionResults['result']) or (not self.is_valid):
             self.print("Unable to fill board!")
             raise Exception("Unable to fill board!")
-        else:
+        else:  # Successfully filled the board!
+            branchingFactor = executionResults.get('branchfactor', None)
             self.print("Filled board!")
             self.print(f"\nSolution:\n{self}")
-            interval = time.time() - starttime
-            self.calculation_time = interval
             self.print(f"Solution found in {interval}s")
+        if returnBranching:
+            return self, branchingFactor
         return self
+
+    @property
+    def empty(self):
+        empty = 0
+        for node in self.nodes:
+            if node.value == 0:
+                empty += 1
+        self.print(f'{empty} empty values')
+        return empty
 
     @property
     def is_valid(self):
