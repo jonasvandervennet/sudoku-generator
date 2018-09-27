@@ -125,7 +125,7 @@ class Sudoku():
         starttime = time.time()
         executionResults = executeFill(queue)
         interval = time.time() - starttime
-        to_solve.calculation_time = interval
+        to_solve.calculation_time = interval / 1000  # Calc_time in ms
         if (not executionResults['result']) or (not to_solve.is_valid):
             to_solve.print("Unable to fill board!")
             raise Exception("Unable to fill board!")
