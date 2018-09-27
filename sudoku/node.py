@@ -14,6 +14,15 @@ class Node():
             if node.value == self.value:
                 return False
         return True
+    
+    def get_neighbor_values(self):
+        """
+        Returns a set of values contained in this node's connected nodes
+        """
+        neighbor_values = set()
+        for cell in self.connected_nodes:
+            neighbor_values.add(cell.value)
+        return neighbor_values
 
     def _equals(self, other):
         return (self.value, self.row, self.col) == (other.value, other.row, other.col)

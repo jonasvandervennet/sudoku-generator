@@ -18,14 +18,16 @@ class SudokuPuzzle():
         Uses these kwargs to initialise a 'solution' Sudoku, unless custom input was provided.
         In that case, an original sudoku is initialised and then solved to create the solution.
         """
+        self.size = size
         if custom is not None:
             self.original = Sudoku(size=size, custom=custom, verbose=verbose)
-            self.solution, branching = self.original.solve(returnBranching=True)
-            self.difficulty = branching * 100 + self.original.empty
-            self.calculation_time = self.solution.calculation_time  # Calc_time in ms!
+            self.solution, branching = self.original.solve_smart(returnBranching=True)
         else:
-            self.solution = Sudoku(size=size, solve=True, verbose=verbose)
-            self.generatePuzzleFromSolution()
+            self.original = Sudoku(size=size, verbose=verbose)  # Fully blank canvas, to be filled later on from the solution
+
+        self.solution, branching = self.original.solve_smart(returnBranching=True)
+        self.difficulty = branching * 100 + self.original.empty
+        self.calculation_time = self.solution.calculation_time  # Calc_time in ms!
 
     def generatePuzzleFromSolution(self):
         print(self.solution)

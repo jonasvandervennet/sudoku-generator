@@ -83,11 +83,7 @@ class Sudoku():
             node = queue[0]
             queue.pop(0)  # ~pop front
 
-            neighbor_values = set()
-            for cell in node.connected_nodes:
-                neighbor_values.add(cell.value)
-
-            options = list(set([i for i in range(1, to_solve.size + 1)]) - neighbor_values)
+            options = list(set([i for i in range(1, to_solve.size + 1)]) - node.get_neighbor_values())
             random.shuffle(options)
             branch = 1  # for detetermining branch factor (difficulty)
             for option in options:
@@ -194,8 +190,92 @@ class Sudoku():
         self.print('Data verified.\n')
         return newSudoku
 
+    def get_options(self, node, returnList=False):
+        if returnList:
+            return list(set([i for i in range(1, self.size + 1)]) - node.get_neighbor_values())
+        return set([i for i in range(1, self.size + 1)]) - node.get_neighbor_values()
+    
     def __str__(self):
         result = ""
         for row in self._rows:
             result += str([node.value for node in row]) + '\n'
         return result
+
+    def solve_smart(self, returnBranching=False):
+        to_solve = self.copy()
+
+        def gather_best_node(sudoku):
+            """
+            Searches nodes with least amount of options, selects one randomly
+            """
+
+            best_nodes = []
+            current_min_options = sudoku.size
+
+            # Gather a list of nodes with the least
+            for node in sudoku.nodes:
+                if not node.value == 0:
+                    continue
+                options = sudoku.get_options(node)
+                if len(options) < current_min_options:
+                    # New best node found
+                    best_nodes = [node]
+                    current_min_options = len(options)
+                elif len(options) == current_min_options:
+                    best_nodes.append(node)
+            return random.choice(best_nodes) if len(best_nodes) != 0 else None
+        
+        def executeFill(depth=0):
+            if depth % 50 == 0 and depth != 0:
+                to_solve.print(f'On rec depth {depth}')
+                to_solve.print(to_solve)
+
+            node = gather_best_node(to_solve)
+            if node is None:
+                return {'result': True, 'branchfactor': 1}
+            options = to_solve.get_options(node, returnList=True)
+            random.shuffle(options)
+
+            branch = 1  # for detetermining branch factor (difficulty)
+            for option in options:
+                node.value = option
+
+                results = executeFill(depth=depth + 1)
+                if results['result']:
+                    branch = (branch - 1)**2
+                    branch += results['branchfactor']  # keeping summation going
+                    return {'result': True, 'branchfactor': branch}
+                branch += 1
+
+            # base case
+            node.value = 0
+            return {'result': False}
+        
+        queue = [node for node in to_solve.nodes if not node.original]
+        if len(queue) == 0:
+            #  The sudoku was already completely full, check if valid or not
+            if not to_solve.is_valid:
+                to_solve.print("Given solution is not valid!")
+                to_solve.print(to_solve)
+                return False
+            else:
+                to_solve.print("Success! Given solution was valid!")
+                to_solve.print(to_solve)
+                return True
+
+        to_solve.print('Trying to fill board...')
+        starttime = time.time()
+        executionResults = executeFill()
+        interval = time.time() - starttime
+        to_solve.calculation_time = interval / 1000  # Calc_time in ms
+        if (not executionResults['result']) or (not to_solve.is_valid):
+            to_solve.print("Unable to fill board!")
+            raise Exception("Unable to fill board!")
+        else:  # Successfully filled the board!
+            branchingFactor = executionResults.get('branchfactor', None)
+            to_solve.print("Filled board!")
+            to_solve.print(f"\nSolution:\n{to_solve}")
+            to_solve.print(f"Solution found in {interval}s")
+        if returnBranching:
+            return to_solve, branchingFactor
+        return to_solve
