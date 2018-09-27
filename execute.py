@@ -48,7 +48,7 @@ custom_16 = [
 def makelist(iterable, verbose=False):
     sudokulist = []
     for i in iterable:
-        sudokulist.append(Sudoku(size=i * i, verbose=verbose))
+        sudokulist.append(Sudoku(size=i * i, verbose=verbose).solve())
 
     for sudoku in sudokulist:
         print(f'{sudoku.size}x{sudoku.size}: {sudoku.calculation_time}s')
@@ -56,31 +56,9 @@ def makelist(iterable, verbose=False):
 
 # sc = Sudoku(size=9, custom=custom_easy, verbose=True)
 # sc.solve()
-# sc2 = Sudoku(size=9, custom=custom_expert, verbose=True)
-# s16 = Sudoku(size=16, verbose=True)
-# s16c = Sudoku(size=16, custom=custom_16, verbose=True)
-# s25 = Sudoku(size=25, verbose=True)
 # makelist([5] * 15, verbose=True)
 
-def score(s):
-    """
-    Score a sudoku
-    """
-    empty = 0
-    for node in s.nodes:
-        if node.value == 0:
-            empty += 1
-    print(f'{empty} empty values')
-    return empty
-    #  TODO: branch factors
-
-
-def generate():
-    sudoku = Sudoku(size=9, solve=True)  # randomized pre-filled board
-    print(sudoku.branchingFactor * 100 + score(sudoku))
-
-
-custom_score_551 = [
+custom_scoring = [
     [3,7,0,0,0,9,0,0,6],
     [8,0,0,1,0,3,0,7,0],
     [0,0,0,0,0,0,0,0,8],
@@ -91,18 +69,8 @@ custom_score_551 = [
     [0,5,0,6,0,2,0,0,7],
     [2,0,0,3,0,0,0,6,1],
 ]
-custom_score_253 = [
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-]
 
-sp = SudokuPuzzle(size=9, verbose=False, custom=custom_score_551)
-print(sp.difficulty)
-print(sp.original.empty)
+sp = SudokuPuzzle(size=9, verbose=False, custom=custom_scoring)
+print(sp.original)
+print(sp.solution)
+print(sp.difficulty, sp.calculation_time)

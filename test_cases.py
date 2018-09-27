@@ -1,5 +1,5 @@
 import unittest
-from sudoku.definitions import Sudoku
+from sudoku.sudoku import Sudoku
 
 
 class TestSpecificExamples(unittest.TestCase):
@@ -27,9 +27,9 @@ class TestSpecificExamples(unittest.TestCase):
             [9, 3, 5, 4, 7, 2, 6, 1, 8],
             [4, 8, 2, 6, 1, 9, 5, 7, 3],
         ]
-        sudoku_example = Sudoku(size=9, custom=custom_input, solve=True)
+        sudoku_example = Sudoku(size=9, custom=custom_input)
         sudoku_result = Sudoku(size=9, custom=expected_result)
-        self.assertTrue(sudoku_example.equals(sudoku_result))
+        self.assertTrue(sudoku_example.solve().equals(sudoku_result))
         
     def test_expert(self):
         custom_input = [
@@ -54,9 +54,9 @@ class TestSpecificExamples(unittest.TestCase):
             [6, 5, 2, 7, 9, 1, 3, 4, 8],
             [4, 1, 9, 2, 3, 8, 6, 5, 7],
         ]
-        sudoku_example = Sudoku(size=9, custom=custom_input, solve=True)
+        sudoku_example = Sudoku(size=9, custom=custom_input)
         sudoku_result = Sudoku(size=9, custom=expected_result)
-        self.assertTrue(sudoku_example.equals(sudoku_result))
+        self.assertTrue(sudoku_example.solve().equals(sudoku_result))
 
 
 if __name__ == '__main__':

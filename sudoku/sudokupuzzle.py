@@ -22,6 +22,7 @@ class SudokuPuzzle():
             self.original = Sudoku(size=size, custom=custom, verbose=verbose)
             self.solution, branching = self.original.solve(returnBranching=True)
             self.difficulty = branching * 100 + self.original.empty
+            self.calculation_time = self.solution.calculation_time
         else:
             self.solution = Sudoku(size=size, solve=True, verbose=verbose)
             self.generatePuzzleFromSolution()

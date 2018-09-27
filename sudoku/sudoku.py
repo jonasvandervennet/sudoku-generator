@@ -6,7 +6,7 @@ from sudoku.node import Node
 
 
 class Sudoku():
-    def __init__(self, size=9, custom=None, solve=False, verbose=False):
+    def __init__(self, size=9, custom=None, verbose=False):
         # assume size is perfect square (TODO: assert square)
         # size is defined as the length of one side
         """
@@ -20,8 +20,6 @@ class Sudoku():
         self.connect_nodes()
         if custom is not None:
             self.fillgrid(custom)
-        if solve:
-            self.solve()
 
     def get_row(self, row):
         return self._rows[row]
@@ -65,17 +63,22 @@ class Sudoku():
                     node.value = custom[i][j]
         except IndexError:
             raise IndexError("Custom sudoku layout was not of the right format!")
-        except Exception as e:  # replace with indexoutofboundserror
+        except Exception as e:  # Other error, just raise
             raise e
 
         self.print("Custom input submitted and processed:")
         self.print(self)
 
     def solve(self, returnBranching=False):
+        """
+        Returns a new sudoku containing the solution of the given sudoku.
+        """
+        to_solve = self.copy()
+
         def executeFill(queue, depth=0):
-            if depth % 50 == 0:
-                self.print(f'On rec depth {depth}')
-                self.print(self)
+            if depth % 50 == 0 and depth != 0:
+                to_solve.print(f'On rec depth {depth}')
+                to_solve.print(to_solve)
 
             node = queue[0]
             queue.pop(0)  # ~pop front
@@ -84,7 +87,7 @@ class Sudoku():
             for cell in node.connected_nodes:
                 neighbor_values.add(cell.value)
 
-            options = list(set([i for i in range(1, self.size + 1)]) - neighbor_values)
+            options = list(set([i for i in range(1, to_solve.size + 1)]) - neighbor_values)
             random.shuffle(options)
             branch = 1  # for detetermining branch factor (difficulty)
             for option in options:
@@ -105,35 +108,35 @@ class Sudoku():
             node.value = 0
             queue = [node] + queue  # ~push front
             return {'result': False, 'queue': queue}
-
-        queue = [node for node in self.nodes if not node.original]
+        
+        queue = [node for node in to_solve.nodes if not node.original]
         if len(queue) == 0:
             #  The sudoku was already completely full, check if valid or not
-            if not self.is_valid:
-                self.print("Given solution is not valid!")
-                self.print(self)
+            if not to_solve.is_valid:
+                to_solve.print("Given solution is not valid!")
+                to_solve.print(to_solve)
                 return False
             else:
-                self.print("Success! Given solution was valid!")
-                self.print(self)
+                to_solve.print("Success! Given solution was valid!")
+                to_solve.print(to_solve)
                 return True
 
-        self.print('Trying to fill board...')
+        to_solve.print('Trying to fill board...')
         starttime = time.time()
         executionResults = executeFill(queue)
         interval = time.time() - starttime
-        self.calculation_time = interval
-        if (not executionResults['result']) or (not self.is_valid):
-            self.print("Unable to fill board!")
+        to_solve.calculation_time = interval
+        if (not executionResults['result']) or (not to_solve.is_valid):
+            to_solve.print("Unable to fill board!")
             raise Exception("Unable to fill board!")
         else:  # Successfully filled the board!
             branchingFactor = executionResults.get('branchfactor', None)
-            self.print("Filled board!")
-            self.print(f"\nSolution:\n{self}")
-            self.print(f"Solution found in {interval}s")
+            to_solve.print("Filled board!")
+            to_solve.print(f"\nSolution:\n{to_solve}")
+            to_solve.print(f"Solution found in {interval}s")
         if returnBranching:
-            return self, branchingFactor
-        return self
+            return to_solve, branchingFactor
+        return to_solve
 
     @property
     def empty(self):
@@ -174,6 +177,22 @@ class Sudoku():
         if not isinstance(other, Sudoku):
             return False
         return not self.equals(other)
+    
+    def copy(self):
+        """
+        Returns new sudoku instance with new nodes containing the same values.
+        """
+        custom_input = [[node.value for node in row] for row in self._rows]
+        self.print('Copying data into new Sudoku.')
+        newSudoku = Sudoku(size=self.size, custom=custom_input, verbose=self.verbose)
+        self.print('Verifying data of new Sudoku.')
+        # Check for original
+        for node in self.nodes:
+            for newnode in newSudoku.nodes:
+                if node._equals(newnode):
+                    newnode.original = node.original
+        self.print('Data verified.\n')
+        return newSudoku
 
     def __str__(self):
         result = ""
