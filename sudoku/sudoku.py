@@ -6,7 +6,7 @@ from sudoku.node import Node
 
 
 class Sudoku():
-    def __init__(self, size=9, custom=None, verbose=False):
+    def __init__(self, size=9, custom=None, verbose=False, debug=False):
         # assume size is perfect square (TODO: assert square)
         # size is defined as the length of one side
         """
@@ -14,12 +14,18 @@ class Sudoku():
         Empty spots should be represented by a 0.
         """
         self.verbose = verbose
+        self.debug = debug
         self.size = size
         self._tilesize = int(np.sqrt(size))
+        initstart = time.time()
         self.nodes, self._rows, self._cols, self._tiles = self.initnodes()
         self.connect_nodes()
+        after_init = time.time() - initstart
+        self.print(f'Node initialisation took {after_init}s')
         if custom is not None:
+            startcustom = time.time()
             self.fillgrid(custom)
+            self.print(f'Loading custom input took {time.time() - startcustom}s')
 
     def get_row(self, row):
         return self._rows[row]
@@ -68,71 +74,6 @@ class Sudoku():
 
         self.print("Custom input submitted and processed:")
         self.print(self)
-
-    def solve(self, returnBranching=False):
-        """
-        Returns a new sudoku containing the solution of the given sudoku.
-        """
-        to_solve = self.copy()
-
-        def executeFill(queue, depth=0):
-            if depth % 50 == 0 and depth != 0:
-                to_solve.print(f'On rec depth {depth}')
-                to_solve.print(to_solve)
-
-            node = queue[0]
-            queue.pop(0)  # ~pop front
-
-            options = list(set([i for i in range(1, to_solve.size + 1)]) - node.get_neighbor_values())
-            random.shuffle(options)
-            branch = 1  # for detetermining branch factor (difficulty)
-            for option in options:
-                node.value = option
-
-                if len(queue) == 0:  # empty
-                    return {'result': True, 'queue': queue, 'branchfactor': branch}
-
-                results = executeFill(queue, depth=depth + 1)
-                queue = results['queue']
-                if results['result']:
-                    branch = (branch - 1)**2
-                    branch += results['branchfactor']  # keeping summation going
-                    return {'result': True, 'queue': queue, 'branchfactor': branch}
-                branch += 1
-
-            # base case
-            node.value = 0
-            queue = [node] + queue  # ~push front
-            return {'result': False, 'queue': queue}
-        
-        queue = [node for node in to_solve.nodes if not node.original]
-        if len(queue) == 0:
-            #  The sudoku was already completely full, check if valid or not
-            if not to_solve.is_valid:
-                to_solve.print("Given solution is not valid!")
-                to_solve.print(to_solve)
-                return False
-            else:
-                to_solve.print("Success! Given solution was valid!")
-                to_solve.print(to_solve)
-                return True
-
-        to_solve.print('Trying to fill board...')
-        starttime = time.time()
-        executionResults = executeFill(queue)
-        interval = time.time() - starttime
-        to_solve.calculation_time = interval / 1000  # Calc_time in ms
-        if (not executionResults['result']) or (not to_solve.is_valid):
-            to_solve.print("Unable to fill board!")
-            raise Exception("Unable to fill board!")
-        else:  # Successfully filled the board!
-            branchingFactor = executionResults.get('branchfactor', None)
-            to_solve.print("Filled board!")
-            to_solve.print(f"\nSolution:\n{to_solve}")
-            to_solve.print(f"Solution found in {interval}s")
-        if returnBranching:
-            return to_solve, branchingFactor
-        return to_solve
 
     @property
     def empty(self):
@@ -199,14 +140,16 @@ class Sudoku():
             result += str([node.value for node in row]) + '\n'
         return result
 
-    def solve_smart(self, returnBranching=False):
+    def solve_smart(self, returnBranching=False, test_unique=False):
         to_solve = self.copy()
 
+        #  This needs to be an object to be easily modified in executeFill
+        unique = {'solved_once': False}  # Used in testing uniqueness
+        
         def gather_best_node(sudoku):
             """
             Searches nodes with least amount of options, selects one randomly
             """
-
             best_nodes = []
             current_min_options = sudoku.size
 
@@ -224,7 +167,7 @@ class Sudoku():
             return random.choice(best_nodes) if len(best_nodes) != 0 else None
         
         def executeFill(depth=0):
-            if depth % 50 == 0 and depth != 0:
+            if self.debug and depth % 50 == 0 and depth != 0:
                 to_solve.print(f'On rec depth {depth}')
                 to_solve.print(to_solve)
 
@@ -240,9 +183,17 @@ class Sudoku():
 
                 results = executeFill(depth=depth + 1)
                 if results['result']:
-                    branch = (branch - 1)**2
-                    branch += results['branchfactor']  # keeping summation going
-                    return {'result': True, 'branchfactor': branch}
+                    if test_unique and unique['solved_once']:
+                        # not unique, return as a valid response but flag the non-uniqueness
+                        return {'result': True, 'unique': False}
+                    elif test_unique and not unique['solved_once']:
+                        # first solution found, return as invalid (keep searching)
+                        unique['solved_once'] = True
+                        return {'result': False}
+                    else:
+                        branch = (branch - 1)**2
+                        branch += results['branchfactor']  # keeping summation going
+                        return {'result': True, 'branchfactor': branch}
                 branch += 1
 
             # base case
@@ -265,7 +216,7 @@ class Sudoku():
         starttime = time.time()
         executionResults = executeFill()
         interval = time.time() - starttime
-        to_solve.calculation_time = interval / 1000  # Calc_time in ms
+        to_solve.calculation_time = interval * 1000  # Calc_time in ms
         if (not executionResults['result']) or (not to_solve.is_valid):
             to_solve.print("Unable to fill board!")
             raise Exception("Unable to fill board!")
@@ -277,3 +228,7 @@ class Sudoku():
         if returnBranching:
             return to_solve, branchingFactor
         return to_solve
+
+    @property
+    def is_unique(self):
+        return self.solve_smart(test_unique=True)['unique']
