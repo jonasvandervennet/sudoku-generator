@@ -190,10 +190,8 @@ class Sudoku():
         self.print('Data verified.\n')
         return newSudoku
 
-    def get_options(self, node, returnList=False):
-        if returnList:
-            return list(set([i for i in range(1, self.size + 1)]) - node.get_neighbor_values())
-        return set([i for i in range(1, self.size + 1)]) - node.get_neighbor_values()
+    def get_options(self, node):
+        return list(set([i for i in range(1, self.size + 1)]) - node.get_neighbor_values())
     
     def __str__(self):
         result = ""
@@ -233,7 +231,7 @@ class Sudoku():
             node = gather_best_node(to_solve)
             if node is None:
                 return {'result': True, 'branchfactor': 1}
-            options = to_solve.get_options(node, returnList=True)
+            options = to_solve.get_options(node)
             random.shuffle(options)
 
             branch = 1  # for detetermining branch factor (difficulty)
