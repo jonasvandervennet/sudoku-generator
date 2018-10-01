@@ -29,7 +29,7 @@ class TestSpecificExamples(unittest.TestCase):
         ]
         sudoku_example = Sudoku(size=9, custom=custom_input)
         sudoku_result = Sudoku(size=9, custom=expected_result)
-        self.assertTrue(sudoku_example.solve().equals(sudoku_result))
+        self.assertTrue(sudoku_example.solve_smart().equals(sudoku_result))
         
     def test_expert(self):
         custom_input = [
@@ -56,7 +56,7 @@ class TestSpecificExamples(unittest.TestCase):
         ]
         sudoku_example = Sudoku(size=9, custom=custom_input)
         sudoku_result = Sudoku(size=9, custom=expected_result)
-        self.assertTrue(sudoku_example.solve().equals(sudoku_result))
+        self.assertTrue(sudoku_example.solve_smart().equals(sudoku_result))
 
 
 if __name__ == '__main__':
