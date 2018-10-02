@@ -19,15 +19,17 @@ class SudokuPuzzle():
         In that case, an original sudoku is initialised and then solved to create the solution.
         """
         self.size = size
-        if custom is not None:
-            self.original = Sudoku(size=size, custom=custom, verbose=verbose)
-            self.solution, branching = self.original.solve_smart(returnBranching=True)
-        else:
-            self.original = Sudoku(size=size, verbose=verbose)  # Fully blank canvas, to be filled later on from the solution
-
+        self.original = Sudoku(size=size, custom=custom, verbose=verbose)
         self.solution, branching = self.original.solve_smart(returnBranching=True)
-        self.difficulty = branching * 100 + self.original.empty
-        self.calculation_time = self.solution.calculation_time  # Calc_time in ms!
+        
+        if custom is None:
+            # Re-fill the original starting from the solution
+            self.original, self.difficulty = self.solution.make_puzzle(diff=650)
+            print(self.original)
+            print(self.difficulty)
+        else:
+            self.difficulty = branching * 100 + self.original.empty
+            self.calculation_time = self.solution.calculation_time  # Calc_time in ms!
 
     def generatePuzzleFromSolution(self):
         print(self.solution)
