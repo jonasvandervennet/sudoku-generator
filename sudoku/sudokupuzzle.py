@@ -24,9 +24,8 @@ class SudokuPuzzle():
         
         if custom is None:
             # Re-fill the original starting from the solution
-            self.original, self.difficulty = self.solution.make_puzzle(diff=650)
-            print(self.original)
-            print(self.difficulty)
+            self.original, self.difficulty = self.solution.make_puzzle(diff=1500)
+            self.calculation_time = self.original.solve_smart().calculation_time
         else:
             self.difficulty = branching * 100 + self.original.empty
             self.calculation_time = self.solution.calculation_time  # Calc_time in ms!

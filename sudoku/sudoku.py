@@ -243,19 +243,31 @@ class Sudoku():
     @property
     def is_unique(self):
         return self.solve_smart(test_unique=True)
+    
+    def _reset_random_node(self):
+        random.choice(self.nodes).value = 0
+        return True
 
-    def make_puzzle(self, diff=500):
+    def make_puzzle(self, diff=500, retry=5):
         if not self.is_valid:
             #  Self is assumed to be a filled grid
             raise ValueError('Sudoku should be a filled grid in order to make a puzzle.')
         puzzle = self.copy()
         cur_diff = 0
+        tries = 0
         while diff > cur_diff:
+            prev_diff = cur_diff
             old_puzzle = puzzle.copy()
-            puzzle.reset_random_node()
+            puzzle._reset_random_node()
             if not puzzle.solve_smart(test_unique=True):
-                #  Puzzle was not unique anymore: for now, return previous iteration
-                return old_puzzle
-            branching = puzzle.solve_smart(returnBranching=True)[1]
-            cur_diff = branching * 100 + puzzle.empty
+                #  Puzzle was not unique anymore: if too many retries, return previous iteration
+                tries += 1
+                if tries > retry:
+                    return old_puzzle, prev_diff
+                else:
+                    puzzle, cur_diff = old_puzzle, prev_diff
+            else:
+                tries = 0
+                branching = puzzle.solve_smart(returnBranching=True)[1]
+                cur_diff = branching * 100 + puzzle.empty
         return puzzle, cur_diff
