@@ -24,8 +24,15 @@ class Node():
             neighbor_values.add(cell.value)
         return neighbor_values
 
-    def _equals(self, other):
+    def equals(self, other):
+        if not isinstance(other, Node):
+            return False
         return (self.value, self.row, self.col) == (other.value, other.row, other.col)
+
+    @property
+    def textfile(self):
+        "Node representation when encoded in textfile"
+        return f'{self.row},{self.col},{self.value}'
 
     def __str__(self):
         return f"node({self.row},{self.col}): {self.value}"

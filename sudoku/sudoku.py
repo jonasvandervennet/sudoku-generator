@@ -27,6 +27,9 @@ class Sudoku():
             self.fillgrid(custom)
             self.print(f'Loading custom input took {time.time() - startcustom}s')
 
+    def get_all_rows(self):
+        return self._rows
+    
     def get_row(self, row):
         return self._rows[row]
 
@@ -99,7 +102,7 @@ class Sudoku():
         try:
             for i, row in enumerate(self._rows):
                 for j, node in enumerate(row):
-                    if not node._equals(other.get_row(i)[j]):
+                    if not node.equals(other.get_row(i)[j]):
                         return False
         except Exception:
             return False
@@ -126,7 +129,7 @@ class Sudoku():
         # Check for original
         for node in self.nodes:
             for newnode in newSudoku.nodes:
-                if node._equals(newnode):
+                if node.equals(newnode):
                     newnode.original = node.original
         self.print('Data verified.\n')
         return newSudoku
