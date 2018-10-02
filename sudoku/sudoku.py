@@ -184,11 +184,14 @@ class Sudoku():
                 results = executeFill(depth=depth + 1)
                 if results['result']:
                     if test_unique and unique['solved_once']:
-                        # not unique, return as a valid response but flag the non-uniqueness
+                        # not unique, return as a valid response but flag the non-uniqueness (flag not necessary)
+                        unique['solution2'] = to_solve.copy()
                         return {'result': True, 'unique': False}
                     elif test_unique and not unique['solved_once']:
                         # first solution found, return as invalid (keep searching)
+                        # while keeping track of solution found
                         unique['solved_once'] = True
+                        unique['solution1'] = to_solve.copy()
                         return {'result': False}
                     else:
                         branch = (branch - 1)**2
@@ -218,9 +221,14 @@ class Sudoku():
         interval = time.time() - starttime
         to_solve.calculation_time = interval * 1000  # Calc_time in ms
         if (not executionResults['result']) or (not to_solve.is_valid):
+            if test_unique and unique['solved_once']:
+                return True
             to_solve.print("Unable to fill board!")
             raise Exception("Unable to fill board!")
         else:  # Successfully filled the board!
+            if test_unique:
+                to_solve.print(f"Multiple solutions found:\n{unique['solution1']}\n{unique['solution2']}")
+                return False
             branchingFactor = executionResults.get('branchfactor', None)
             to_solve.print("Filled board!")
             to_solve.print(f"\nSolution:\n{to_solve}")
@@ -231,4 +239,4 @@ class Sudoku():
 
     @property
     def is_unique(self):
-        return self.solve_smart(test_unique=True)['unique']
+        return self.solve_smart(test_unique=True)
