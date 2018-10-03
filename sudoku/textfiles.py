@@ -1,9 +1,7 @@
-from sudoku.sudoku import Sudoku
-from sudoku.sudokupuzzle import SudokuPuzzle
-
 """
 Sudoku to and from textfiles
 """
+
 
 def sudoku_write(sudoku, ofp):
     #  Write all data related to nodes
@@ -15,9 +13,9 @@ def sudoku_write(sudoku, ofp):
                 ofp.write(';')
         ofp.write('|')
 
+
 def sudoku2text(sudoku, output='sudoku.txt'):
     "Encodes a Sudoku to a textfile"
-    to_encode = sudoku.get_all_rows()
     with open(output, 'a') as ofp:
         #  Signal this is a regular sudoku, not a board with solution
         ofp.write('S|')
@@ -27,13 +25,14 @@ def sudoku2text(sudoku, output='sudoku.txt'):
         ofp.write('\n')
     return True
 
+
 def board2text(sb, output='sudoku.txt'):
     "Encodes a Sudokuboard (with problem and solution + difficulty) to a textfile"
     with open(output, 'a') as ofp:
         #  Signal this is a board WITH solution
         ofp.write('B|')
         sudoku_write(sb.original, ofp)
-        ofp.write('$')  # Separate the sudokus
+        ofp.write('$|')  # Separate the sudokus
         sudoku_write(sb.solution, ofp)
         #  Write extra data (size, difficulty)
         ofp.write(f"S{sb.size}D{sb.difficulty}")

@@ -268,6 +268,20 @@ class Sudoku():
                     puzzle, cur_diff = old_puzzle, prev_diff
             else:
                 tries = 0
-                branching = puzzle.solve_smart(returnBranching=True)[1]
-                cur_diff = branching * 100 + puzzle.empty
+                cur_diff = puzzle.estimate_difficulty(iterations=50)
+                # Sometimes difficulty lowers, only take max diff
+                if (cur_diff < prev_diff):
+                    puzzle = old_puzzle
+                    cur_diff = prev_diff
+                """branching = puzzle.solve_smart(returnBranching=True)[1]
+                cur_diff = puzzle._diff_from_branching(branching)"""
         return puzzle, cur_diff
+
+    def _diff_from_branching(self, branching):
+        return branching * 100 + self.empty
+    
+    def estimate_difficulty(self, iterations=20):
+        total = 0
+        for i in range(iterations):
+            total += self._diff_from_branching(self.solve_smart(returnBranching=True)[1])
+        return int(total / iterations)

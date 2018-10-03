@@ -12,7 +12,7 @@ final score S = B * 100 + E, whrere E are the empty nodes.
 
 
 class SudokuPuzzle():
-    def __init__(self, size=9, custom=None, verbose=False):
+    def __init__(self, size=9, custom=None, verbose=False, _diff=500, _retries=100):
         """
         Accepts the following kwargs: size, custom and verbose.
         Uses these kwargs to initialise a 'solution' Sudoku, unless custom input was provided.
@@ -24,10 +24,10 @@ class SudokuPuzzle():
         
         if custom is None:
             # Re-fill the original starting from the solution
-            self.original, self.difficulty = self.solution.make_puzzle(diff=1500)
+            self.original, self.difficulty = self.solution.make_puzzle(diff=_diff, retry=_retries)
             self.calculation_time = self.original.solve_smart().calculation_time
         else:
-            self.difficulty = branching * 100 + self.original.empty
+            self.difficulty = self.original._diff_from_branching(branching)
             self.calculation_time = self.solution.calculation_time  # Calc_time in ms!
 
     def generatePuzzleFromSolution(self):
