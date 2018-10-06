@@ -1,6 +1,6 @@
-"""
-Sudoku to and from textfiles
-"""
+import random
+
+from sudoku.sudokupuzzle import SudokuPuzzle
 
 
 def sudoku_write(sudoku, ofp):
@@ -14,21 +14,9 @@ def sudoku_write(sudoku, ofp):
         ofp.write('|')
 
 
-def sudoku2text(sudoku, output='sudoku.txt'):
-    "Encodes a Sudoku to a textfile"
-    with open(output, 'a') as ofp:
-        #  Signal this is a regular sudoku, not a board with solution
-        ofp.write('S|')
-        sudoku_write(sudoku, ofp)
-        #  Write extra data (size)
-        ofp.write(f"S{sudoku.size}")
-        ofp.write('\n')
-    return True
-
-
-def board2text(sb, output='sudoku.txt'):
+def puzzle2text(sb, filename='boards.txt'):
     "Encodes a Sudokuboard (with problem and solution + difficulty) to a textfile"
-    with open(output, 'a') as ofp:
+    with open(filename, 'a') as ofp:
         #  Signal this is a board WITH solution
         ofp.write('B|')
         sudoku_write(sb.original, ofp)
@@ -40,7 +28,33 @@ def board2text(sb, output='sudoku.txt'):
     return True
     
 
-def text2sudoku(input='sudoku.txt'):
-    with open(input, 'r') as ifp:
+def text2puzzle(filename='boards.txt', index=None):
+    with open(filename, 'r') as ifp:
         coded_lines = ifp.readlines()
-    return True
+        selection = random.choice(coded_lines) if index is None else coded_lines[index]
+    details = selection.split('|')
+    meta = details[-1]
+    size = int(meta.split('D')[0].split('S')[-1])
+    if not details[size + 1] == '$':
+        raise ValueError('Content was not formatted right!')
+    custom_input = [[int(coded_node.split(',')[2]) for coded_node in coded_row.split(';')] for coded_row in details[1:size + 1]]
+    return SudokuPuzzle(size=size, custom=custom_input)
+
+
+def show_errors_in_file(filename='boards.txt'):
+    with open(filename, 'r') as ifp:
+        lines = ifp.readlines()
+    error_lines = []
+    for i, line in enumerate(lines):
+        details = line.split('|')
+        meta = details[-1]
+        size = int(meta.split('D')[0].split('S')[-1])
+        if not details[size + 1] == '$':
+            raise ValueError('Content was not formatted right!')
+        custom_input = [[int(coded_node.split(',')[2]) for coded_node in coded_row.split(';')] for coded_row in details[1:size + 1]]
+        puzzle = SudokuPuzzle(size=size, custom=custom_input)
+        if not puzzle.original.is_unique:
+            error_lines.append(i)
+    if len(error_lines) == 0:
+        print('All fine!')
+    return error_lines
