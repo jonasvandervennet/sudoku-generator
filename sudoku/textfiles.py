@@ -54,7 +54,7 @@ def show_errors_in_file(filename='boards.txt'):
         custom_input = [[int(coded_node.split(',')[2]) for coded_node in coded_row.split(';')] for coded_row in details[1:size + 1]]
         puzzle = SudokuPuzzle(size=size, custom=custom_input)
         if not puzzle.original.is_unique:
-            error_lines.append(i)
+            error_lines.append(i + 1)
     if len(error_lines) == 0:
         print('All fine!')
     return error_lines
