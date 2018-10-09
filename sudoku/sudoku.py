@@ -255,24 +255,22 @@ class Sudoku():
         tries = 0
         while diff > cur_diff:
             prev_diff = cur_diff
-            old_puzzle = puzzle.copy()
+            prev_puzzle = puzzle.copy()
             puzzle._reset_random_node()
-            if not puzzle.solve_smart(test_unique=True):
+            if not puzzle.is_unique:
                 #  Puzzle was not unique anymore: if too many retries, return previous iteration
                 tries += 1
                 if tries > retry:
-                    return old_puzzle, prev_diff
+                    print('Retried too much!')
+                    return prev_puzzle, prev_diff
                 else:
-                    puzzle, cur_diff = old_puzzle, prev_diff
+                    puzzle, cur_diff = prev_puzzle, prev_diff
             else:
                 tries = 0
                 cur_diff = puzzle.estimate_difficulty(iterations=50)
                 # Sometimes difficulty lowers, only take max diff
                 if (cur_diff < prev_diff):
-                    puzzle = old_puzzle
-                    cur_diff = prev_diff
-                """branching = puzzle.solve_smart(returnBranching=True)[1]
-                cur_diff = puzzle._diff_from_branching(branching)"""
+                    puzzle, cur_diff = prev_puzzle, prev_diff
         return puzzle, cur_diff
 
     def _diff_from_branching(self, branching):

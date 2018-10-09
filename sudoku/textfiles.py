@@ -14,16 +14,16 @@ def sudoku_write(sudoku, ofp):
         ofp.write('|')
 
 
-def puzzle2text(sb, filename='boards.txt'):
+def puzzle2text(sp, filename='boards.txt'):
     "Encodes a Sudokuboard (with problem and solution + difficulty) to a textfile"
     with open(filename, 'a') as ofp:
         #  Signal this is a board WITH solution
         ofp.write('B|')
-        sudoku_write(sb.original, ofp)
+        sudoku_write(sp.original, ofp)
         ofp.write('$|')  # Separate the sudokus
-        sudoku_write(sb.solution, ofp)
+        sudoku_write(sp.solution, ofp)
         #  Write extra data (size, difficulty)
-        ofp.write(f"S{sb.size}D{sb.difficulty}")
+        ofp.write(f"S{sp.size}D{sp.difficulty}")
         ofp.write('\n')
     return True
     

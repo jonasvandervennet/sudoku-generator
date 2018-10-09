@@ -12,7 +12,7 @@ final score S = B * 100 + E, whrere E are the empty nodes.
 
 
 class SudokuPuzzle():
-    def __init__(self, size=9, custom=None, verbose=False, _diff=500, _retries=100):
+    def __init__(self, size=9, custom=None, verbose=False, _diff=100, _retries=10):
         """
         Accepts the following kwargs: size, custom and verbose.
         Uses these kwargs to initialise a 'solution' Sudoku, unless custom input was provided.
