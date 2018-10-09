@@ -187,18 +187,17 @@ class Sudoku():
                 results = executeFill(depth=depth + 1)
                 if results['result']:
                     if test_unique and unique['solved_once']:
-                        # not unique, return as a valid response but flag the non-uniqueness (flag not necessary)
-                        unique['solution2'] = to_solve.copy()
-                        return {'result': True, 'unique': False}
+                        # not unique, return as a valid response
+                        return {'result': True}
                     elif test_unique and not unique['solved_once']:
-                        # first solution found, return as invalid (keep searching)
+                        # first solution found, keep searching
                         # while keeping track of solution found
                         unique['solved_once'] = True
-                        unique['solution1'] = to_solve.copy()
-                        return {'result': False}
+                        continue
                     else:
-                        branch = (branch - 1)**2
-                        branch += results['branchfactor']  # keeping summation going
+                        if returnBranching:
+                            branch = (branch - 1)**2
+                            branch += results['branchfactor']  # keeping summation going
                         return {'result': True, 'branchfactor': branch}
                 branch += 1
 
@@ -230,8 +229,7 @@ class Sudoku():
             raise Exception("Unable to fill board!")
         else:  # Successfully filled the board!
             if test_unique:
-                to_solve.print(f"Multiple solutions found:\n{unique['solution1']}\n{unique['solution2']}")
-                return False
+                return not unique['solved_once']
             branchingFactor = executionResults.get('branchfactor', None)
             to_solve.print("Filled board!")
             to_solve.print(f"\nSolution:\n{to_solve}")
