@@ -26,9 +26,9 @@ def puzzle2text(sp, filename='boards.txt'):
         ofp.write(f"S{sp.size}D{sp.difficulty}")
         ofp.write('\n')
     return True
-    
 
-def oldtext2puzzle(filename='boards.txt', index=None):
+
+def text2puzzle(filename='boards.txt', index=None):
     with open(filename, 'r') as ifp:
         coded_lines = ifp.readlines()
         selection = random.choice(coded_lines) if index is None else coded_lines[index]
@@ -37,7 +37,7 @@ def oldtext2puzzle(filename='boards.txt', index=None):
     size = int(meta.split('D')[0].split('S')[-1])
     if not details[size + 1] == '$':
         raise ValueError('Content was not formatted right!')
-    custom_input = [[int(coded_node.split(',')[2]) for coded_node in coded_row.split(';')] for coded_row in details[1:size + 1]]
+    custom_input = [[int(valuestring) for valuestring in coded_row.split(';')] for coded_row in details[1:size + 1]]
     return SudokuPuzzle(size=size, custom=custom_input)
 
 
@@ -45,16 +45,12 @@ def show_errors_in_file(filename='boards.txt'):
     with open(filename, 'r') as ifp:
         lines = ifp.readlines()
     error_lines = []
-    for i, line in enumerate(lines):
-        details = line.split('|')
-        meta = details[-1]
-        size = int(meta.split('D')[0].split('S')[-1])
-        if not details[size + 1] == '$':
-            raise ValueError('Content was not formatted right!')
-        custom_input = [[int(coded_node.split(',')[2]) for coded_node in coded_row.split(';')] for coded_row in details[1:size + 1]]
-        puzzle = SudokuPuzzle(size=size, custom=custom_input)
+    length = len(lines)
+    for i in range(length):
+        puzzle = text2puzzle(filename=filename, index=i)
         if not puzzle.original.is_unique:
             error_lines.append(i + 1)
     if len(error_lines) == 0:
         print('All fine!')
+        return None
     return error_lines
