@@ -32,7 +32,7 @@ class Node():
     @property
     def textfile(self):
         "Node representation when encoded in textfile"
-        return f'{self.row},{self.col},{self.value}'
+        return f'{self.value}'
 
     def __str__(self):
         return f"node({self.row},{self.col}): {self.value}"

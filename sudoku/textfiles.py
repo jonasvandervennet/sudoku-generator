@@ -28,7 +28,7 @@ def puzzle2text(sp, filename='boards.txt'):
     return True
     
 
-def text2puzzle(filename='boards.txt', index=None):
+def oldtext2puzzle(filename='boards.txt', index=None):
     with open(filename, 'r') as ifp:
         coded_lines = ifp.readlines()
         selection = random.choice(coded_lines) if index is None else coded_lines[index]
