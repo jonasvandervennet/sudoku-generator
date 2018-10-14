@@ -261,7 +261,7 @@ class Sudoku():
                 #  Puzzle was not unique anymore: if too many retries, return previous iteration
                 tries += 1
                 if tries > retry:
-                    print('Retried too much!')
+                    puzzle.print('Retried too much!')
                     return prev_puzzle, prev_diff
                 else:
                     puzzle, cur_diff = prev_puzzle, prev_diff
