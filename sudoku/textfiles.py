@@ -51,6 +51,5 @@ def show_errors_in_file(filename='boards.txt'):
         if not puzzle.original.is_unique:
             error_lines.append(i + 1)
     if len(error_lines) == 0:
-        print('All fine!')
-        return None
+        return f'Checked file "{filename}". All fine!'
     return error_lines
